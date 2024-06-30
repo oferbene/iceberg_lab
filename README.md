@@ -1,7 +1,7 @@
-# Iceberg and SQL Stream Builder Lab
+# Iceberg Lab
 
 ## Summary
-This workshop will take you through the new capabilities that have been added to CDP Public Cloud Lakehouse and into the various features of the Sql stream builder.
+This workshop will take you through the new capabilities that have been added to CDP Public Cloud Lakehouse. 
 
 In this workshop you will learn how to take advantage of Iceberg to support Data Lakehouse initiatives.
 
@@ -17,10 +17,6 @@ It will also give on overview of **Cloudera Data Flow** to give hands on experie
 - Real-time data streaming  
 - Out of the box connection to various data sources and integration with Iceberg  
 - Easy deployment of data pipelines using no code and accelerators  
-
-And finally an overview of the SQL Stream Builder powered by Flink including:  
-- Make streaming processing accessible with simply SQL  
-- Easy integration with Iceberg  
 
 
 *Note to admins: Refer to the Setup file containing the recommendations to setup the lab*
@@ -40,8 +36,7 @@ And finally an overview of the SQL Stream Builder powered by Flink including:
     * [3.1. Setup 1 - Create the table in Hue](##31-setup-1-create-the-table-in-hue)  
     * [3.2. Setup 2 - Collect all the configuration details](##32-setup-2-collect-all-the-configuration-details)  
     * [3.3. Deploy the Nifi Flow](##33-deploy-the-nifi-flow)  
-  * [4. Introduction to Iceberg with Sql Stream Builder ](#4-introduction-to-iceberg-with-sql-stream-builder) 
-    * [4.1. Setup SSB: Project creation](##41-setup-ssb-project-creation)
+
 
 
 ### 1. Introduction to the workshop  
@@ -578,121 +573,7 @@ In Kafka, accessing the "Streams Messaging Light Duty" Datahub, powered by Kafka
 
 ![AccessStreamMessengingManager.png](./images/AccessStreamMessengingManager.png)
 
-#### 4. Introduction to Iceberg with Sql Stream Builder  
-Once we are complete with NiFi, we will shift into Sql Stream Builder to show its capability to query Kafka with SQL,
-Infer Schema, Create Iceberg Connectors,  and use SQL to INSERT INTO an Iceberg Table.  
 
-
-Summary of this section:  
-
-1. Import this repo as a project in Sql Stream Builder
-2. Open your Project and have a look around at the left menu. Notice all hover tags. Explore the vast detail in Explorer menus.
-3. Import Your Keytab
-4. Check out Source Control. If you created vs import on first screen you may have to press import here still. You can setup Authentication here.
-5. Create and activate an Environment with a key value pair for your userid -> username
-6. Inspect/Add Data Sources. You may need to re-add Kafka. The Hive data source should work out of the box.
-7. Inspect/Add Virtual Kafka Tables. You can edit the existing tables against your kafka data source and correct topics. Just be sure to choose right topics and detect schema before save.
-
-
-Open the SSB UI by clicking on Streaming SQL Console.
-![AccessSSB.png](./images/AccessSSB.png)
-  
-
-You'll need:
-- A project downloaded from github, pointing to a specific and unique repository to import all the confitguration details
-- An active environment in your SSB project to store your userid variable
-- The Kafka endpoints you'll be querying
-  
-
-#### 4.1. Setup SSB: Project creation
-  
-Before you can use Streaming SQL Console, you need to create a [project](./documentation/IcebergLab-Documentation.md#ssb-project) where you can submit your SQL jobs and
-manage your project resources.  
- 
-  
-Step 1: click import with the SSB Home UI:  
-![SSBProjectImport.png](./images/SSBProjectImport.png)  
-  
-Step 2: indicate the url to the git repo: `https://github.com/marionlamoureux/iceberg_lab` and indicate the branch`main`.  
-    
-Step 3: point to the pre-created folder named after your username following the naming convention `SSB-Iceberg-Demo-user<xx>`.  
-    
-![ALLfoldersforSSB.png](./images/ALLfoldersforSSB.png)
-  
-Click `Import`  
-  
-![SSBImportwindow.png](./images/SSBImportwindow.png)  
-  
-  
-#### 3.2. Setup SSB - activate environment  
-
-We'll need a variable containing your username to be pointing to the correct Kafka topics and Iceberg tables named after that username in previous labs.
-To set a envrionment variable in your SSB project, you'll need an **active** environment.  
-  
-_Documentation on SSB environment_ [SSB environments](./additional/ssbenvironment.md)
-  
-  
-![SSBNewenvironment.png](./images/SSBNewenvironment.png)
-
-  
-The variable key the project is expecting is:
-Key: `userid`
-Value: `your username`
-
-![EnvrionmentSaveSSB.png](./images/EnvrionmentSaveSSB.png)
-
-
-**Make sure you activate the environment**
-
-![activateenv](./images/SSBActivateenv.png)
-
-
-
-#### 3.2 Setup SSB: activate your keytab
-
-Click on the top of your screen within the SSB project "unlock keytab"
-![ssbunlockkeytab](./images/ssbunlockkeytab.png)
-
-and indicate your workload password
-
-![keytabinSSB](./images/KeytabinSSB.png)
-  
-#### 2.Setup SSB: Create Kafka Data Store
-Create Kafka Data Store by selecting Data Sources in the left pane,
-clicking on the three-dotted icon next to Kafka, then selecting New Kafka Data Source.
-![KafkaAddsource.png](./images/KafkaAddsource.png)  
-  
-**Name**: {user-id}_cdp_kafka  
-**Brokers**: (Comma-separated List as shown below)
-  
-Example: `kafka-corebroker2.workshop.vayb-xokg.cloudera.site:9093, 
-  kafka-corebroker1.workshop.vayb-xokg.cloudera.site:9093,
-  kafka-corebroker0.workshop.vayb-xokg.cloudera.site:9093`  
-**Protocol**: SASL/SSL  
-**SASL Mechanism**: KERBEROS  
-
-![createkafkaconnection](./images/createkafkaconnection.png)
-
-Click on Validate to test the connections. Once successful click on Create.
-
-Create Kafka Table: Create Kafka Table, by selecting Virtual Tables in the left pane by clicking on the three-dotted icon next to it.  
-
-Then click on New Kafka Table.  
-  
-![CreateKafkaTable.png](./images/CreateKafkaTable.png)
-  
-Configure the Kafka Table using the details below, do this for all three tables corresponding to your kafka topics, airports, countries and routes.  
-Table Name: tablename    
-Kafka Cluster:select the Kafka data source you created previously  
-Data Format: JSON.  
-Topic Name: select the topic created in Schema Registry  
-  
-![KafkaTableConfig.png](./images/KafkaTableConfig.png)  
-    
-
-Since you are reading data from a JSON topic, go ahead and click on Detect Schema to get the schema inferred. You should see the schema be updated in the Schema Definition tab.  
-  
-More on [formats in SSB](./additional/formatsinssb.md)  
   
 
 **This step is performed automatically when deploying the project from github:Copy/paste the thrift Hive URI**   
