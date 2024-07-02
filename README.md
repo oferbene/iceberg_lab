@@ -366,6 +366,9 @@ Snapshot id format looks like:
 `3916175409400584430` **with no quotes**
 
 #### 2.4 ACID V2
+Version 2 of the Iceberg spec adds ACID compliant tables including row-level deletes and updates.
+
+The primary change in version 2 adds delete files to encode rows that are deleted in existing data files. This version can be used to delete or replace individual rows in immutable data files without rewriting the files.
 
 Here we'll show the commands that could be run concomitantly thanks to [ACID](./documentation/IcebergLab-Documentation.md#acid) in Iceberg
 Let's update a row.  
