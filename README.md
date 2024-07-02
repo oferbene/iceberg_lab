@@ -24,7 +24,7 @@ It will also give on overview of **Cloudera Data Flow** to give hands on experie
 
 ## TABLE OF CONTENT
   * [1. Introduction to the workshop](#1-introduction-to-the-workshop)  
-    * [1.1. Logging in](##1.1-logging in)  
+    * [1.1. Logging in](##1.1-logging-in)  
     * [1.2. Data Set](##11-data-set)   
     * [1.3. Access the data set in Cloudera Data Warehouse](##13-access-the-data-set-in-cloudera-data-warehouse)  
     * [1.4. Generating the Iceberg tables](##14-generating-the-iceberg-tables)   
