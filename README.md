@@ -31,7 +31,8 @@ It will also give on overview of **Cloudera Data Flow** to give hands on experie
   * [2. Table Maintenance in Iceberg](#2-table-maintenance-in-Iceberg)  
     * [2.1. Loading data](##21-loading-data)  
     * [2.2. Partition evolution](22-partition-evolution)  
-    * [2.3. Snapshots](##23-snapshots)  
+    * [2.3. Snapshots](##23-snapshots)
+    * [2.4. Acid-V2](##24-Acid-V2)
   * [3. Introduction to Iceberg with NiFi ](#3-introduction-to-iceberg-with-nifi)   
     * [3.1. Setup 1 - Create the table in Hue](##31-setup-1-create-the-table-in-hue)  
     * [3.2. Setup 2 - Collect all the configuration details](##32-setup-2-collect-all-the-configuration-details)  
@@ -368,7 +369,7 @@ SELECT * FROM ${user_id}_airlines_maint.flights FOR SYSTEM_VERSION AS OF ${snaps
 Snapshot id format looks like:
 `3916175409400584430` **with no quotes**
 
-#### 3. ACID V2
+#### 2.4 ACID V2
 
 Here we'll show the commands that could be run concomitantly thanks to [ACID](./documentation/IcebergLab-Documentation.md#acid) in Iceberg
 Let's update a row.  
@@ -420,198 +421,9 @@ WHERE year = ${year}
   AND deptime = ${deptime};
 ```
 
-The following labs will take you through various aspects of CDP Public Cloud to enable you on what will be available to support Data Lakehouse use cases. 
 CDP Public Cloud now includes support for Apache Iceberg in the following services: Impala, Hive, Flink, Sql Stream Builder (SSB), Spark 3, NiFi, and Replication Manager (BDR).
   
-This makes Cloudera the only vendor to support Iceberg in a multi-hybrid cloud environment. 
+Cloudera the only vendor to support Iceberg in a multi-hybrid cloud environment. 
 Users can develop an Iceberg application once and deploy anywhere.  
-
-
-### 3. Introduction to Iceberg with NiFi  
-
-In this very short lab we are going to use Nifi to load data into Kafka and Iceberg:  
-- First, we will use NiFi to ingest an airport route data set (JSON) and send that data to Kafka and Iceberg.  
-- Next we will use NiFi to ingest a countries data set (JSON) and send to Kafka and Iceberg.   
-- Finally we will use NiFi to ingest an airports data set (JSON) and send to Kafka and Iceberg.   
-  
-#### 3.1. Setup 1 - Create the table in Hue
-While still in Hue, please run the below to create Iceberg tables as destination for the Nifi flow we will deploy just after:
-
-```SQL
--- TABLES NEEDED FOR THE NIFI LAB
-DROP TABLE IF EXISTS ${user_id}_airlines.`routes_nifi_iceberg`;
-CREATE TABLE ${user_id}_airlines.`routes_nifi_iceberg` (
-  `airline_iata` VARCHAR,
-  `airline_icao` VARCHAR,
-  `departure_airport_iata` VARCHAR,
-  `departure_airport_icao` VARCHAR,
-  `arrival_airport_iata` VARCHAR,
-  `arrival_airport_icao` VARCHAR,
-  `codeshare` BOOLEAN,
-  `transfers` BIGINT,
-  `planes` ARRAY<VARCHAR>
-) STORED AS ICEBERG;
-
-DROP TABLE IF EXISTS ${user_id}_airlines.`airports_nifi_iceberg`;
-CREATE TABLE ${user_id}_airlines.`airports_nifi_iceberg` (
-  `city_code` VARCHAR,
-  `country_code` VARCHAR,
-  `name_translations` STRUCT<`en`:string>,
-  `time_zone` VARCHAR,
-  `flightable` BOOLEAN,
-  `coordinates` struct<`lat`:DOUBLE, `lon`:DOUBLE>,
-  `name` VARCHAR,
-  `code` VARCHAR,
-  `iata_type` VARCHAR
-) STORED AS ICEBERG;
-
-DROP TABLE IF EXISTS ${user_id}_airlines.`countries_nifi_iceberg`;
-CREATE TABLE ${user_id}_airlines.`countries_nifi_iceberg` (
-  `name_translations` STRUCT<`en`:VARCHAR>,
-  `cases` STRUCT<`su`:VARCHAR>,
-  `code` VARCHAR,
-  `name` VARCHAR,
-  `currency` VARCHAR
-) STORED AS ICEBERG;
-```
-
-
-#### 3.2. Setup 2 - Collect all the configuration details
-
-You'll need a few information from the workspace to configure the pre-designed flow:
-- Your keytab
-- Kafka Endpoints
-- Hive Metastore URI
-
-
-##### Download your Kerberos Keytab
-
-Change from your HUE tab back to the tab with the CDW UI. On the left hand menu,
-click on your username and access the Profile page. On the right, under Actions, click Get keytab.
-
-![Userprofile.png](./images/Userprofile.png)  
-
-Download the keytab file  
-  
-![Get Keytab](./images/Iceberg_GetKeytab.png)  
-
-Select the correct [CDP environment](./documentation/IcebergLab-Documentation.md#cdp-environments), you can ask the presenter for it:  
-
-
-![CDPenvforkeytab](./images/keytab_env.png)  
-
-
-##### Set your Workload password
-
-In your profile, set your [workload password](./documentation/IcebergLab-Documentation.md#workload-password), for the purpose of this lab, 
-just pick the same password as your login credentials but in a production environment, that is of course not best practice.  
-
-![workloadpassword](./images/workloadpassword.png)
-
-
-**Get your [Kafka Endpoints](./documentation/IcebergLab-Documentation.md#kafka-broker-endpoints) from your presenter**
-
-
-**Get the [Hive Metastore URI](./documentation/IcebergLab-Documentation.md#hive-metastore-uri) from your presenter**
-
-#### 3.3. Deploy the Nifi Flow
-
-Access the Cloudera Data Flow Service:   
-  
-![AccessCDF](./images/AccessCDF.png)  
-  
-Let's deploy our NiFi flows. Access the Flow Catalog and identify the `SSB Demo - Iceberg` Flow
-
-![CataloginCDF.png](./images/CataloginCDF.png)  
-
-and deploy it:  
-
-![CDFDeployFlow.png](./images/CDFDeployFlow.png)
-
-The **Target Workspace** selector is used to choose in which of the available CDP
-Environments to create the new flow Deployment. For this lab, we only have one,
-but a typical pattern would be to have separate Environments for development,
-testing and production deployments.
-
-In the Flow deployment wizard, pick a name for your flow (include your usename
-to avoid confusion with other participants' flows).
-
-You can pick a project at this stage or leave it "Unassigned". Projects are used to limit the visibility of drafts, deployments, Inbound Connections, and custom NAR Configurations within an Environment.
-
-On the next page, "NiFi Configuration", keep all the default options, including
-the NiFi version.
-  
-On the next page, "Parameters", fill in the fields with the value for the parameters necessary to configure the flow.
-
-|Parameter|Value|Image|
-|----------|----------|----------|
-|CDP Workload User|Enter your user id(ex: `user001`)||
-|CDP Workload User Password|Enter your workload password (which is the same as your login password and that you can set under your profile and set sensitive to ‘Yes’||
-|Hadoop Configuration Resources|Collected earlier in the hive-clientconfig zip file downloaded from the datalake's Cloudera Manager `hive-site.xml`,`core-site.xml`,`hdfs-site.xml`|![configfiles](./images/configfiles.png)|
-|Hive Metastore URI|Collected earlier. Ex:`thrift://workshop-aw-dl-master0.workshop.vayb-xokg.cloudera.site:9083`||
-|Kafka Broker Endpoint|Collected earlier. Ex `kafka-corebroker2.workshop.vayb-xokg.cloudera.site:9093, kafka-corebroker1.workshop.vayb-xokg.cloudera.site:9093, kafka-corebroker0.workshop.vayb-xokg.cloudera.site:9093`||  
-|Kerberos Keytab|Load file collected earlier from your profile |![uploadKeytab](./images/Nifi_loadkeytab.png)|  
-  
-Leave the default settings for Sizing and scaling, as well as the KPIs and deploy your flow.
-  
-Give the flow around 10 minutes to deploy.
-Once done, you can access the flow within the Nifi Canvas by seletion "View in Nifi":  
-
-![CDFViewInNifi.png](./images/CDFViewInNifi.png)
-  
-In Hue, you can query the tables previously created and see the data being ingested from Nifi.
-```SQL
----Try the below command
-SELECT * FROM ${user_id}_airlines.`countries_nifi_iceberg`;
----Or
-SELECT * FROM ${user_id}_airlines.`airports_nifi_iceberg`;
----Or
-SELECT * FROM ${user_id}_airlines.`routes_nifi_iceberg`;
-
-```
-In Kafka, accessing the "Streams Messaging Light Duty" Datahub, powered by Kafka, you can see the topics created by the client in the Nifi processor and the messages ingested subsequently.
-
-![AccessStreamMessengingManager.png](./images/AccessStreamMessengingManager.png)
-
-
-  
-
-**This step is performed automatically when deploying the project from github:Copy/paste the thrift Hive URI**   
-In the Cloudera Data Warehousing service, identify the Hive Virtual Warehouse and copy the JDBC url and keep only the node name in the string:  
-`hs2-asdf.dw-go01-demo-aws.ylcu-atmi.cloudera.site`
-
-![JDBCfromHive.png](./images/JDBCfromHive.png)
-
-Once done, create a new job in the editor and try a few statements:  
-  
-```SQL
-SELECT * FROM <kafka_topic> --. This will confirm that you have results in your kafka topic. Be patient, if this is your first job may take some time (1-2 minutes) to report results.  
-CREATE TABLE <tablename> -- This will create the virtual table in ssb_default name space. It will not create the table in IMPALA.  
-INSERT INTO <tablename> SELECT * from <kafka_topic> --. Be Patient. This will create the impala table and begin reporting results from the kafka topic shortly.  
---Lastly, execute the final select. These results are from IMPALA.  
-```
-  
-## 3.3. Running the Jobs
-   
-1- **Countries_Kafka**  
-Select from Kafka Countries, Create Iceberg Table, Insert Results  
-Confirm Kafka topic   
-2- **Routes_Kafka**
-Select from Kafka Routes, Create IceBerg Table, Insert Results   
-Confirm Kafka topic   
-3- **Test_Hue_Tables**    
-Confirm source iceberg table exists, check table names, and namespaces.   
-4- **Time_Travel**  
-Execute required DESCRIBE in Hue, use SnapShot Ids  
-5- **CSA_1_11_Iceberg_Sample**  
-No modifications should be required to this job
-You need to run the queries separately.  
-  
-
-### Top Tips
-If you are using different topics w/ different schema, use SSB to get the DDL for topic. 
-Copy paste into the ssb job's create statement and begin modifying to acceptance. Just be careful with complicated schema such as array, struct, etc.
-If you are testing CREATE and INSERT in iterations, you should increment all table names per test iteration. Your previous interations will effect next iterations so stay in unique table names.
-Use DROP statement with care. It will DROP your Virtual Table, but not necessarily the impala/hive table. DROP those in HUE if needed.
 
 
