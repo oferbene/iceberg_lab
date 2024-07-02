@@ -33,10 +33,6 @@ It will also give on overview of **Cloudera Data Flow** to give hands on experie
     * [2.2. Partition evolution](22-partition-evolution)  
     * [2.3. Snapshots](##23-snapshots)
     * [2.4. Acid-V2](##24-Acid-V2)
-  * [3. Introduction to Iceberg with NiFi ](#3-introduction-to-iceberg-with-nifi)   
-    * [3.1. Setup 1 - Create the table in Hue](##31-setup-1-create-the-table-in-hue)  
-    * [3.2. Setup 2 - Collect all the configuration details](##32-setup-2-collect-all-the-configuration-details)  
-    * [3.3. Deploy the Nifi Flow](##33-deploy-the-nifi-flow)  
 
 
 
